@@ -1,0 +1,22 @@
+node("agent-01"){
+    stage ("Git checkout"){
+        git branch: 'main', credentialsId: 'git', url: 'https://github.com/andrey-grozov/ansible.git'
+    }
+    stage("Get params"){
+        script {
+            env.prod_run = input id: 'prod_run', message: '', parameters: [choice(choices: ['False', 'True'], name: 'prod_run')]
+        }
+    }
+    stage("Run playbook"){
+        if (env.prod_run =='True') {
+            dir('./3') {
+                sh 'ansible-playbook site.yml -i inventory/prod --check --diff'
+            }
+        }
+        else {
+            dir('./3') {
+                sh 'ansible-playbook site.yml -i inventory/prod'
+            }
+        }
+    } 
+}
